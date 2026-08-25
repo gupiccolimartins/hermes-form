@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pronto para comprar?</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --paper: #F1ECE0;
+  --paper-line: #DDD4C0;
+  --ink: #1F2C3A;
+  --ink-soft: #5B6B79;
+  --brass: #B8862F;
+  --green: #3C6E4F;
+  --green-bg: #E7EEE5;
+  --red: #A6402F;
+  --red-bg: #F3E4DE;
+  --amber: #B4802B;
+  --amber-bg: #F1E6D3;
+  --card: #FBF9F3;
+  --radius: 3px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0/100% 28px,
+    var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Sans', sans-serif;
+  min-height:100vh;
+  padding:32px 16px 64px;
+  display:flex;
+  justify-content:center;
+}
+:focus-visible{ outline:2px solid var(--brass); outline-offset:3px; }
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001s !important; transition-duration:0.001s !important; }
+}
+
+.sheet{
+  width:100%;
+  max-width:560px;
+  background:var(--card);
+  border:1px solid var(--ink);
+  box-shadow:6px 6px 0 rgba(31,44,58,0.12);
+  position:relative;
+  overflow:hidden;
+}
+.sheet::before{
+  content:"AVALIAÇÃO Nº 001 — COMPRA x ALUGUEL";
+  display:block;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:10px;
+  letter-spacing:0.12em;
+  color:var(--ink-soft);
+  border-bottom:1px solid var(--ink);
+  padding:10px 20px;
+  background:repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(31,44,58,0.035) 6px, rgba(31,44,58,0.035) 7px);
+}
+
+.pane{ padding:32px 28px 28px; }
+.pane.hidden{ display:none; }
+
+/* ---------- Intro ---------- */
+h1{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-size:clamp(28px,6vw,38px);
+  line-height:1.08;
+  margin:0 0 14px;
+  letter-spacing:-0.01em;
+}
+.lede{
+  color:var(--ink-soft);
+  font-size:15px;
+  line-height:1.55;
+  margin:0 0 24px;
+  max-width:44ch;
+}
+.meta-row{
+  display:flex;
+  gap:18px;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  color:var(--ink-soft);
+  border-top:1px dashed var(--paper-line);
+  border-bottom:1px dashed var(--paper-line);
+  padding:12px 0;
+  margin-bottom:26px;
+  flex-wrap:wrap;
+}
+.meta-row span{ display:flex; align-items:center; gap:6px; }
+.meta-row b{ color:var(--ink); }
+
+.btn{
+  font-family:'IBM Plex Sans', sans-serif;
+  font-weight:600;
+  font-size:15px;
+  border:1px solid var(--ink);
+  background:var(--ink);
+  color:var(--paper);
+  padding:13px 22px;
+  cursor:pointer;
+  border-radius:var(--radius);
+  transition:transform 0.12s ease, background 0.12s ease;
+}
+.btn:hover{ background:#31445A; }
+.btn:active{ transform:translateY(1px); }
+.btn.secondary{
+  background:transparent;
+  color:var(--ink);
+}
+.btn.secondary:hover{ background:rgba(31,44,58,0.06); }
+.btn[disabled]{ opacity:0.35; cursor:not-allowed; }
+.btn[disabled]:hover{ background:var(--ink); }
+
+/* ---------- Progress: blueprint room grid ---------- */
+.progress{
+  display:flex;
+  gap:4px;
+  margin-bottom:22px;
+}
+.progress i{
+  flex:1;
+  height:6px;
+  background:var(--paper-line);
+  border:1px solid var(--ink);
+  position:relative;
+}
+.progress i.done{ background:var(--brass); }
+.progress i.current{ background:var(--ink); }
+
+.q-tag{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.08em;
+  color:var(--brass);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.q-text{
+  font-family:'Fraunces', serif;
+  font-weight:500;
+  font-size:22px;
+  line-height:1.3;
+  margin:0 0 20px;
+}
+.options{ display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+.opt{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border:1px solid var(--ink);
+  background:var(--paper);
+  padding:13px 14px;
+  cursor:pointer;
+  border-radius:var(--radius);
+  font-size:14.5px;
+  text-align:left;
+}
+.opt:hover{ background:#EAE3D2; }
+.opt .box{
+  width:16px; height:16px;
+  border:1.5px solid var(--ink);
+  flex:0 0 auto;
+  position:relative;
+  border-radius:2px;
+}
+.opt.selected{ background:var(--ink); color:var(--paper); }
+.opt.selected .box{ border-color:var(--paper); }
+.opt.selected .box::after{
+  content:"";
+  position:absolute; inset:3px;
+  background:var(--brass);
+}
+.nav-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+
+/* ---------- Result ---------- */
+.verdict-wrap{ text-align:center; padding-top:6px; }
+.stamp{
+  display:inline-block;
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-style:italic;
+  font-size:clamp(20px,5.4vw,28px);
+  border:3px solid currentColor;
+  border-radius:6px;
+  padding:12px 22px;
+  transform:rotate(-4deg) scale(1);
+  letter-spacing:0.02em;
+  animation:stampIn 0.35s cubic-bezier(.2,.9,.3,1.2) both;
+  margin:6px 0 18px;
+}
+@keyframes stampIn{
+  0%{ transform:rotate(-4deg) scale(2.6); opacity:0; }
+  60%{ opacity:1; }
+  100%{ transform:rotate(-4deg) scale(1); opacity:1; }
+}
+.stamp.green{ color:var(--green); background:var(--green-bg); }
+.stamp.amber{ color:var(--amber); background:var(--amber-bg); }
+.stamp.red{ color:var(--red); background:var(--red-bg); }
+
+.verdict-sub{
+  color:var(--ink-soft);
+  font-size:14.5px;
+  line-height:1.6;
+  max-width:42ch;
+  margin:0 auto 26px;
+}
+
+.score-block{
+  text-align:left;
+  border-top:1px dashed var(--paper-line);
+  padding-top:20px;
+  margin-bottom:22px;
+}
+.score-title{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.08em;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+.bar-row{ margin-bottom:12px; }
+.bar-label{
+  display:flex; justify-content:space-between;
+  font-size:13px; margin-bottom:5px;
+}
+.bar-label b{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:12px; }
+.bar-track{
+  height:8px;
+  background:var(--paper);
+  border:1px solid var(--ink);
+}
+.bar-fill{ height:100%; background:var(--ink); transition:width 0.5s ease; }
+.bar-fill.weak{ background:var(--red); }
+.bar-fill.mid{ background:var(--amber); }
+.bar-fill.strong{ background:var(--green); }
+
+.tip-box{
+  background:var(--amber-bg);
+  border:1px solid var(--ink);
+  border-left:4px solid var(--brass);
+  padding:14px 16px;
+  font-size:14px;
+  line-height:1.55;
+  text-align:left;
+  margin-bottom:26px;
+}
+.tip-box b{ display:block; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px; color:var(--ink); }
+
+.cta-row{ display:flex; flex-direction:column; gap:10px; }
+.fine{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:10.5px;
+  color:var(--ink-soft);
+  margin-top:18px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <!-- INTRO -->
+  <div class="pane" id="pane-intro">
+    <h1>Você está pronto<br>para comprar?</h1>
+    <p class="lede">Uma autoavaliação rápida sobre reserva de emergência, estabilidade de renda e tempo de permanência na cidade — para saber se ainda vale mais alugar ou se já dá pra dar o próximo passo.</p>
+    <div class="meta-row">
+      <span>⏱ <b>2 min</b></span>
+      <span>❖ <b>6 perguntas</b></span>
+      <span>▤ <b>resultado imediato</b></span>
+    </div>
+    <button class="btn" id="start-btn">Iniciar avaliação →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="pane hidden" id="pane-quiz">
+    <div class="progress" id="progress"></div>
+    <div class="q-tag" id="q-tag"></div>
+    <p class="q-text" id="q-text"></p>
+    <div class="options" id="options"></div>
+    <div class="nav-row">
+      <button class="btn secondary" id="back-btn">← Voltar</button>
+      <button class="btn" id="next-btn" disabled>Próxima →</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="pane hidden" id="pane-result">
+    <div class="verdict-wrap">
+      <div id="stamp" class="stamp">—</div>
+      <p class="verdict-sub" id="verdict-sub"></p>
+    </div>
+    <div class="score-block">
+      <div class="score-title">Seu raio-x financeiro</div>
+      <div id="bars"></div>
+    </div>
+    <div class="tip-box">
+      <b>Ponto de atenção</b>
+      <span id="tip-text"></span>
+    </div>
+    <div class="cta-row">
+      <button class="btn" id="cta-btn">Quero simular minha compra</button>
+      <button class="btn secondary" id="restart-btn">Refazer avaliação</button>
+    </div>
+  </div>
+
+  <div class="fine" id="fine"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    cat: "Reserva de emergência",
+    tag: "01 · Reserva",
+    text: "Além do valor da entrada, você tem uma reserva de emergência guardada?",
+    options: [
+      { label: "Sim, cobre 6 meses ou mais de despesas", score: 3 },
+      { label: "Tenho algo, mas cobre menos de 3 meses", score: 2 },
+      { label: "Só tenho o dinheiro da entrada, nada além disso", score: 1 },
+      { label: "Não tenho reserva nenhuma hoje", score: 0 },
+    ],
+  },
+  {
+    cat: "Estabilidade de renda",
+    tag: "02 · Renda",
+    text: "Como você descreveria a estabilidade da sua renda atual?",
+    options: [
+      { label: "CLT/servidor público, renda fixa há anos", score: 3 },
+      { label: "Renda variável, mas previsível e consolidada", score: 2 },
+      { label: "Autônomo/freelancer com receita instável", score: 1 },
+      { label: "Renda recente ou em transição de carreira", score: 0 },
+    ],
+  },
+  {
+    cat: "Tempo na cidade",
+    tag: "03 · Permanência",
+    text: "Quanto tempo você pretende ficar nessa cidade ou região?",
+    options: [
+      { label: "5 anos ou mais, é onde quero me fixar", score: 3 },
+      { label: "Entre 3 e 5 anos, provavelmente", score: 2 },
+      { label: "De 1 a 3 anos, ainda não tenho certeza", score: 1 },
+      { label: "Menos de 1 ano, posso precisar me mudar", score: 0 },
+    ],
+  },
+  {
+    cat: "Entrada acumulada",
+    tag: "04 · Entrada",
+    text: "Quanto do valor de entrada do imóvel que você quer você já tem guardado?",
+    options: [
+      { label: "100% da entrada já está guardada", score: 3 },
+      { label: "Entre 50% e 99%", score: 2 },
+      { label: "Entre 20% e 49%", score: 1 },
+      { label: "Menos de 20%", score: 0 },
+    ],
+  },
+  {
+    cat: "Comprometimento de renda",
+    tag: "05 · Dívidas",
+    text: "Somando todas as dívidas e financiamentos atuais, quanto da sua renda mensal já está comprometido?",
+    options: [
+      { label: "Até 10% — praticamente sem dívidas", score: 3 },
+      { label: "Entre 10% e 25%", score: 2 },
+      { label: "Entre 25% e 40%", score: 1 },
+      { label: "Mais de 40%", score: 0 },
+    ],
+  },
+  {
+    cat: "Flexibilidade / mobilidade",
+    tag: "06 · Mobilidade",
+    text: "O quanto seu trabalho ou momento de vida pode exigir que você se mude nos próximos anos?",
+    options: [
+      { label: "Nada, meu trabalho e rotina estão fixos aqui", score: 3 },
+      { label: "Pouca chance de mudança", score: 2 },
+      { label: "Existe uma chance real de precisar mudar", score: 1 },
+      { label: "É bem provável que eu mude em breve", score: 0 },
+    ],
+  },
+];
+
+let current = 0;
+const answers = new Array(QUESTIONS.length).fill(null);
+
+const paneIntro = document.getElementById('pane-intro');
+const paneQuiz = document.getElementById('pane-quiz');
+const paneResult = document.getElementById('pane-result');
+const progressEl = document.getElementById('progress');
+const qTag = document.getElementById('q-tag');
+const qText = document.getElementById('q-text');
+const optionsEl = document.getElementById('options');
+const nextBtn = document.getElementById('next-btn');
+const backBtn = document.getElementById('back-btn');
+const fine = document.getElementById('fine');
+
+document.getElementById('start-btn').addEventListener('click', () => {
+  paneIntro.classList.add('hidden');
+  paneQuiz.classList.remove('hidden');
+  renderProgress();
+  renderQuestion();
+});
+
+function renderProgress(){
+  progressEl.innerHTML = '';
+  QUESTIONS.forEach((_, i) => {
+    const seg = document.createElement('i');
+    if (i < current) seg.classList.add('done');
+    else if (i === current) seg.classList.add('current');
+    progressEl.appendChild(seg);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  qTag.textContent = q.tag;
+  qText.textContent = q.text;
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.setAttribute('type','button');
+    if (answers[current] === i) btn.classList.add('selected');
+    btn.innerHTML = `<span class="box"></span><span>${opt.label}</span>`;
+    btn.addEventListener('click', () => selectOption(i));
+    optionsEl.appendChild(btn);
+  });
+  backBtn.style.visibility = current === 0 ? 'hidden' : 'visible';
+  nextBtn.textContent = current === QUESTIONS.length - 1 ? 'Ver resultado →' : 'Próxima →';
+  nextBtn.disabled = answers[current] === null;
+  fine.textContent = `Pergunta ${current + 1} de ${QUESTIONS.length}`;
+}
+
+function selectOption(i){
+  answers[current] = i;
+  renderQuestion();
+}
+
+nextBtn.addEventListener('click', () => {
+  if (answers[current] === null) return;
+  if (current < QUESTIONS.length - 1){
+    current++;
+    renderProgress();
+    renderQuestion();
+  } else {
+    showResult();
+  }
+});
+
+backBtn.addEventListener('click', () => {
+  if (current > 0){
+    current--;
+    renderProgress();
+    renderQuestion();
+  }
+});
+
+document.getElementById('restart-btn').addEventListener('click', () => {
+  current = 0;
+  answers.fill(null);
+  paneResult.classList.add('hidden');
+  paneIntro.classList.remove('hidden');
+  fine.textContent = '';
+});
+
+document.getElementById('cta-btn').addEventListener('click', () => {
+  const btn = document.getElementById('cta-btn');
+  btn.textContent = 'Obrigado! Em breve alguém fala com você ✓';
+  btn.disabled = true;
+});
+
+function showResult(){
+  paneQuiz.classList.add('hidden');
+  paneResult.classList.remove('hidden');
+  fine.textContent = '';
+
+  const total = answers.reduce((sum, ansIdx, i) => sum + QUESTIONS[i].options[ansIdx].score, 0);
+  const maxScore = QUESTIONS.length * 3;
+
+  const stampEl = document.getElementById('stamp');
+  const subEl = document.getElementById('verdict-sub');
+
+  let tier;
+  if (total >= 14){
+    tier = 'green';
+    stampEl.textContent = 'APTO PARA COMPRAR';
+    subEl.textContent = 'Seus fundamentos estão sólidos: reserva, renda e tempo de permanência apontam pra compra. Vale simular um financiamento agora.';
+  } else if (total >= 8){
+    tier = 'amber';
+    stampEl.textContent = 'QUASE LÁ';
+    subEl.textContent = 'Você está no caminho, mas um ou dois pontos ainda pedem ajuste antes de assinar qualquer contrato. Veja abaixo o que fortalecer.';
+  } else {
+    tier = 'red';
+    stampEl.textContent = 'MELHOR ALUGAR POR ORA';
+    subEl.textContent = 'Hoje alugar te dá mais flexibilidade e segurança. Isso pode mudar rápido — vale reavaliar em alguns meses.';
+  }
+  stampEl.className = 'stamp ' + tier;
+
+  const barsEl = document.getElementById('bars');
+  barsEl.innerHTML = '';
+  let weakestIdx = 0;
+  let weakestScore = 99;
+  QUESTIONS.forEach((q, i) => {
+    const s = q.options[answers[i]].score;
+    if (s < weakestScore){ weakestScore = s; weakestIdx = i; }
+    const pct = Math.round((s / 3) * 100);
+    let cls = 'strong';
+    if (s <= 1) cls = 'weak';
+    else if (s === 2) cls = 'mid';
+
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label"><span>${q.cat}</span><b>${s}/3</b></div>
+      <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+    `;
+    barsEl.appendChild(row);
+  });
+
+  const tips = {
+    "Reserva de emergência": "Antes de comprar, construa uma reserva de 3 a 6 meses de despesas fora do valor da entrada — ela te protege de imprevistos sem comprometer o financiamento.",
+    "Estabilidade de renda": "Se sua renda ainda é recente ou variável, considere esperar alguns meses de consolidação antes de assumir uma parcela fixa de longo prazo.",
+    "Tempo na cidade": "Comprar só compensa financeiramente se você ficar tempo suficiente para diluir os custos de transação. Se ainda há dúvida sobre onde vai morar, alugar reduz o risco.",
+    "Entrada acumulada": "Quanto maior a entrada, menor o financiamento e os juros pagos no total. Vale acelerar essa poupança antes de fechar negócio.",
+    "Comprometimento de renda": "Bancos e sua própria saúde financeira pedem folga: mantenha o total de dívidas (incluindo a futura parcela) abaixo de 30% da renda.",
+    "Flexibilidade / mobilidade": "Se existe chance real de mudança de cidade ou de vida, alugar preserva sua liberdade sem o custo de vender um imóvel às pressas.",
+  };
+  document.getElementById('tip-text').textContent = tips[QUESTIONS[weakestIdx].cat];
+}
+</script>
+
+</body>
+</html>
